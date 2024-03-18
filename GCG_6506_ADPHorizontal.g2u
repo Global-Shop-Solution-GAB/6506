@@ -1,0 +1,343 @@
+Program.Sub.ScreenSU.Start
+Gui.Form..Create
+Gui.Form..Caption("ADP Horizontal Export 6506")
+Gui.Form..Size(5640,1785)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..BackColor(-2147483633)
+Gui.Form..MousePointer(0)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.lbl1.Create(Label,"Run Date and Time",True,1935,255,0,240,120,True,0,"Arial",8,-2147483633,0)
+Gui.Form.lblCode.Create(Label,"4 Character Code",True,1485,255,0,3720,120,True,0,"Arial",8,-2147483633,0)
+Gui.Form.txtCode.Create(TextBox,"",True,1215,300,0,3690,375,True,0,"Arial",8,-2147483643,1)
+Gui.Form.txtCode.MaxLength(4)
+Gui.Form.cmdOK.Create(Button)
+Gui.Form.cmdOK.Size(1200,375)
+Gui.Form.cmdOK.Position(270,795)
+Gui.Form.cmdOK.Caption("OK")
+Gui.Form.cmdOK.Event(Click,cmdOK_Click)
+Gui.Form.ddlRunDateTime.Create(DropDownList)
+Gui.Form.ddlRunDateTime.Size(3330,330)
+Gui.Form.ddlRunDateTime.Position(300,375)
+Gui.Form.ddlRunDateTime.Enabled(False)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+f.Intrinsic.Control.Try
+	
+	f.Intrinsic.Control.If(v.Caller.Hook,<>,15290)
+		f.Intrinsic.Control.ExitSub
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.Control.If(v.Caller.CompanyCode,=,"HTI")
+		gui.Form.txtCode.Text("ZPX")
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.UI.InvokeWaitDialog("Binding Run Date for testing...")
+	f.Intrinsic.Control.CallSub(Bind_RunDate_RunTime)
+	F.Intrinsic.Control.CallSub(Create_Dictionaries)
+	f.Intrinsic.UI.CloseWaitDialog
+	gui.Form..Show		
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.Catching.Start
+f.Intrinsic.Control.Try
+	v.Local.sError.Declare
+	
+	F.Intrinsic.String.Build("Error Number: {6}{0}Folder: {5}{0}Program: GCG_6506_ADPHorizontal.g2u {0}Subroutine: {1}{0}Error Occurred {2} with description: {3}{0}GAB Version: {4}{0}GSS Version: {7}",V.Ambient.Newline,V.Args.Sub,V.Args.errorno,V.Args.errordesc,V.Ambient.GABVersion,v.Ambient.ScriptPath,v.Args.Errorno,v.Caller.GSSVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	
+	f.Intrinsic.Control.CallSub(Unload)
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.End
+f.Intrinsic.Control.EndTry
+Program.Sub.Catching.End
+
+Program.Sub.Form_UnLoad.Start
+F.Intrinsic.Control.Try	
+	
+	f.Intrinsic.Control.CallSub(Unload)	
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Form_UnLoad.End
+
+Program.Sub.Unload.Start
+f.Intrinsic.Control.End
+Program.Sub.Unload.End
+
+Program.Sub.Bind_RunDate_RunTime.Start
+f.Intrinsic.Control.Try
+	v.Local.sDate.Declare
+	v.Local.sTime.Declare
+	v.Local.sDateTime.Declare
+	
+	Function.Intrinsic.String.Left(Variable.Passed.888888,8,Variable.Local.sDate)
+	Function.Intrinsic.String.Mid(Variable.Passed.888888,9,6,Variable.Local.sTime)
+	f.Intrinsic.String.Build("{0}|{1}",v.Local.sDate,v.Local.sTime,v.Local.sDateTime)
+	gui.Form.ddlRunDateTime.AddItem(v.Local.sDateTime)
+	gui.Form.ddlRunDateTime.ListIndex(0)
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Bind_RunDate_RunTime.End
+
+Program.Sub.cmdOK_Click.Start
+f.Intrinsic.Control.Try
+	v.Local.sRunDateTime.Declare
+	v.Local.sSQL.Declare
+	v.Local.iCnt.Declare
+	v.Local.iInner.Declare
+	v.Local.sFilter.Declare
+	v.Local.sEmployee.Declare
+	v.Local.sType.Declare
+	v.Local.sEC.Declare
+	v.Local.sDescr.Declare
+	v.Local.sHours.Declare
+	v.Local.sCode.Declare
+	
+	v.Local.sRegularHours.Declare
+	v.Local.sOvertimeHours.Declare
+	v.Local.sEC2.Declare
+	v.Local.sEC2Hours.Declare	
+	v.Local.sEC3.Declare
+	v.Local.sEC3Hours.Declare	
+	v.Local.sEC4.Declare
+	v.Local.sEC4Hours.Declare	
+	v.Local.sEC5.Declare
+	v.Local.sEC5Hours.Declare	
+	v.Local.sEC6.Declare
+	v.Local.sEC6Hours.Declare		
+	v.Local.sEC7.Declare
+	v.Local.sEC7Hours.Declare	
+	v.Local.sEC8.Declare
+	v.Local.sEC8Hours.Declare	
+	v.Local.sEC9.Declare
+	v.Local.sEC9Hours.Declare
+	v.Local.sEC10.Declare
+	v.Local.sEC10Hours.Declare
+	v.Local.sLine.Declare
+	
+	v.Local.sName.Declare
+	v.Local.bElse.Declare
+	
+	v.Local.sExport.Declare	
+	v.Local.sFilename.Declare
+	v.Local.bEx.Declare
+	v.Local.sHeader.Declare
+
+	v.Local.sRet.Declare
+	v.Local.sDefaultFile.Declare
+	'database format:
+	'Run_CYMD Char(8): YYYYMMDD
+	'Run_Time Char(6): HHNNSS (24hours)
+	'Employee Char(5)
+	'Name Char(30)
+	'Type Char(2)
+	'EC Char(2)
+	'Descr Char(2)
+	'Hours Char(6) 000.00 (decimal)
+	
+	'Validate
+	F.Intrinsic.Control.If(V.Screen.Form!ddlRunDateTime.Text,=,"",or,v.Screen.Form!ddlRunDateTime.Text,=,"|")
+		f.Intrinsic.UI.Msgbox("No Run Date Time selected.","Invalid")
+		f.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	'Validate code
+	F.Intrinsic.Control.If(V.Screen.Form!txtCode.Text.Trim,=,"")
+		f.Intrinsic.UI.Msgbox("No Code Entered","Invalid")
+		f.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	v.Local.sCode.Set(v.Screen.Form!txtCode.Text)	
+	f.Intrinsic.String.Split(v.Screen.Form!ddlRunDateTime.Text,"|",v.Local.sRunDateTime)
+	f.Intrinsic.Control.If(v.DataTable.Exp.Exists)
+		f.Data.DataTable.Close("Exp")
+	f.Intrinsic.Control.EndIf
+	f.Intrinsic.String.Build("select EMPLOYEE, NAME,Seq, TYPE, EC,DESCR, HOURS,PYRL_LABOR_XFER.* from PYRL_LABOR_XFER where Run_Cymd = '{0}' and Run_Time = '{1}' order by employee;",v.Local.sRunDateTime(0),v.Local.sRunDateTime(1),v.Local.sSQL)
+	f.ODBC.Connection!conx.OpenCompanyConnection
+	f.Data.DataTable.CreateFromSQL("Exp","conx",v.Local.sSQL,True)
+	f.ODBC.Connection!conx.Close
+	
+	f.Data.DataView.Create("Exp","vExp")
+	f.Intrinsic.Control.If(v.DataTable.distinctEmployees.Exists)
+		f.Data.DataTable.Close("distinctEmployees")
+	f.Intrinsic.Control.EndIf
+	f.Data.DataView.ToDataTableDistinct("Exp","vExp","distinctEmployees","Employee",True)
+	
+	f.Intrinsic.StringBuilder.Create("Exceptional")
+	f.Intrinsic.StringBuilder.Create("Export")
+	'Set Header
+	v.Local.sHeader.Set("Co Code,Batch ID,File #,Tax Frequency,Temp Dept,Temp Rate,Reg Hours,O/T Hours,Hours 3 Code,Hours 3 Amount,Hours 3 Code,Hours 3 Amount,Hours 3 Code,Hours 3 Amount,Hours 3 Code,Hours 3 Amount,Hours 4 Code,Hours 4 Amount,Hours 4 Code,Hours 4 Amount,Hours 4 Code,Hours 4 Amount,Hours 4 Code,Hours 4 Amount,Reg Earnings,O/T Earnings,Earnings 5 Code,Earnings 5 Amount,Earnings 5 Code,Earnings 5 Amount,Cancel Pay,Other Period Beginning Date,Other Period Ending Date")
+	f.Intrinsic.StringBuilder.AppendLine("Export",v.Local.sHeader)	
+	'Loop Employeee
+	f.Intrinsic.Control.For(v.Local.iCnt,0,v.DataTable.distinctEmployees.RowCount--,1)
+		v.Local.sEmployee.Set(v.DataTable.distinctEmployees(v.Local.iCnt).Employee!FieldValString)		
+		f.Intrinsic.String.Replace(v.Local.sName,","," ",v.Local.sName)
+		f.Intrinsic.String.Build("Employee = '{0}' and Type in ('RT','OT','EC','HT')",v.Local.sEmployee,v.Local.sFilter)
+		f.Data.DataView.SetFilter("Exp","vExp",v.Local.sFilter)
+		f.Data.DataView.SetSort("Exp","vExp","Seq")
+
+		v.Local.sRegularHours.Set("")
+		v.Local.sOvertimeHours.Set("")
+		v.Local.sEC2.Set("")
+		v.Local.sEC2Hours.Set("")	
+		v.Local.sEC3.Set("")
+		v.Local.sEC3Hours.Set("")	
+		v.Local.sEC4.Set("")
+		v.Local.sEC4Hours.Set("")	
+		v.Local.sEC5.Set("")
+		v.Local.sEC5Hours.Set("")	
+		v.Local.sEC6.Set("")
+		v.Local.sEC6Hours.Set("")		
+		v.Local.sEC7.Set("")
+		v.Local.sEC7Hours.Set("")	
+		v.Local.sEC8.Set("")
+		v.Local.sEC8Hours.Set("")	
+		v.Local.sEC9.Set("")
+		v.Local.sEC9Hours.Set("")		
+		
+		'Loop rows for each employee
+		f.Intrinsic.Control.For(v.Local.iInner,0,v.DataView.Exp!vExp.RowCount--,1)
+			v.Local.sName.Set(v.DataView.Exp!vExp(v.Local.iInner).Name!FieldValString)
+			v.Local.sType.Set(v.DataView.Exp!vExp(v.Local.iInner).Type!FieldValTrim)
+			v.Local.sEC.Set(v.DataView.Exp!vExp(v.Local.iInner).EC!FieldValTrim)
+			v.Local.sDescr.Set(v.DataView.Exp!vExp(v.Local.iInner).Descr!FieldValTrim)
+			v.Local.sHours.Set(v.DataView.Exp!vExp(v.Local.iInner).Hours!FieldValTrim)
+			v.Local.bElse.Set(False)
+			f.Intrinsic.Control.SelectCase(v.Local.sType)
+				f.Intrinsic.Control.Case("RT")
+					v.Local.sRegularHours.Set(v.Local.sHours)
+				f.Intrinsic.Control.Case("OT")	
+					v.Local.sOvertimeHours.Set(v.Local.sHours)
+				f.Intrinsic.Control.CaseAny("EC","HT")
+					f.Intrinsic.Control.SelectCase(v.Local.sEC)
+						f.Intrinsic.Control.Case("02")
+							v.Local.sEC2.Set(v.Local.sDescr.left3)
+							v.Local.sEC2Hours.Set(v.Local.sHours)
+						f.Intrinsic.Control.Case("03")
+							v.Local.sEC3.Set(v.Local.sDescr.left3)
+							v.Local.sEC3Hours.Set(v.Local.sHours)						
+						f.Intrinsic.Control.Case("04")
+							v.Local.sEC4.Set(v.Local.sDescr.left3)
+							v.Local.sEC4Hours.Set(v.Local.sHours)						
+						f.Intrinsic.Control.Case("05")
+							v.Local.sEC5.Set(v.Local.sDescr.left3)
+							v.Local.sEC5Hours.Set(v.Local.sHours)						
+						f.Intrinsic.Control.Case("06")
+							v.Local.sEC6.Set(v.Local.sDescr.left3)
+							v.Local.sEC6Hours.Set(v.Local.sHours)						
+						f.Intrinsic.Control.Case("07")
+							v.Local.sEC7.Set(v.Local.sDescr.left3)
+							v.Local.sEC7Hours.Set(v.Local.sHours)						
+						f.Intrinsic.Control.Case("08")
+							v.Local.sEC8.Set(v.Local.sDescr.left3)
+							v.Local.sEC8Hours.Set(v.Local.sHours)					
+						f.Intrinsic.Control.Case("09")
+							v.Local.sEC9.Set(v.Local.sDescr.left3)
+							v.Local.sEC9Hours.Set(v.Local.sHours)	
+						f.Intrinsic.Control.Case("10")
+							v.Local.sEC10.Set(v.Local.sDescr.left3)
+							v.Local.sEC10Hours.Set(v.Local.sHours)							
+					f.Intrinsic.Control.EndSelect					
+			f.Intrinsic.Control.EndSelect				
+		f.Intrinsic.Control.Next(v.Local.iInner)
+		
+		f.Intrinsic.Control.If(v.Dictionary.dictEmp![v.Local.sEmployee],<>,"")
+			v.Local.sEmployee.Set(v.Dictionary.dictEmp![v.Local.sEmployee])
+		f.Intrinsic.Control.EndIf
+		f.Intrinsic.String.LPad(v.Local.sEmployee,"0",6,v.Local.sEmployee)
+		F.Intrinsic.String.Build("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25}",V.Local.sCode,V.Local.sCode,v.Local.sEmployee,"","","",v.Local.sRegularHours,v.Local.sOvertimeHours,v.Local.sEC2,v.Local.sEC2Hours,v.Local.sEC3,v.Local.sEC3Hours,v.Local.sEC4,v.Local.sEC4Hours,v.Local.sEC5,v.Local.sEC5Hours,v.Local.sEC6,v.Local.sEC6Hours,v.Local.sEC7,v.Local.sEC7Hours,v.Local.sEC8,v.Local.sEC8Hours,v.Local.sEC9,v.Local.sEC9Hours,v.Local.sEC10,v.Local.sEC10Hours,v.Local.sLine)
+		f.Intrinsic.StringBuilder.AppendLine("Export",v.Local.sLine)
+
+		
+	f.Intrinsic.Control.Next(v.Local.iCnt)
+
+'	'Export to exceptional file. Ex: when it has DT for Double Time. ADP does not process double time, per Langley. She got the reply from ADP
+'	f.Intrinsic.String.Build("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26},{27}",v.Local.sEmployee,v.Local.sName,v.Local.sType,v.Local.sEC,v.Local.sDescr,v.Local.sHours,v.Local.sLine)
+'	f.Intrinsic.StringBuilder.Append("Exceptional",v.Local.sLine)
+'	v.Local.bElse.Set(True)	
+	f.Intrinsic.StringBuilder.ToString("Export",v.Local.sExport)
+	f.Intrinsic.StringBuilder.Dispose("Exceptional")
+	f.Intrinsic.StringBuilder.Dispose("Export")
+	
+	f.Intrinsic.String.Build("{0}\ADP{1}.csv",v.Caller.TempDir,v.Local.sCode,v.Local.sDefaultFile)	
+	F.Intrinsic.UI.ShowSaveFileDialog(V.Local.sDefaultFile,"csv|*.csv",V.Local.sFileName)
+	F.Intrinsic.Control.If(V.Local.sFileName,=,"***CANCEL***")
+		f.Intrinsic.Control.CallSub(Unload)
+	F.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.File.String2File(v.Local.sFilename,v.Local.sExport)
+	f.Intrinsic.UI.Msgbox(v.Local.sFileName,"File Saved")	
+	f.Intrinsic.Control.CallSub(Unload)
+	
+f.Intrinsic.Control.Catch	
+	f.Intrinsic.Control.If(v.Ambient.ErrorNumber,<>,208)
+		f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.Else
+		f.Intrinsic.UI.Msgbox(v.Ambient.ErrorDescription)
+	f.Intrinsic.Control.EndIf	
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdOK_Click.End
+
+Program.Sub.Check_Folder.Start
+f.Intrinsic.Control.Try
+	v.Local.bEx.Declare
+	v.Local.sDir.Declare
+	
+	'Check custom folder: Custom\6506
+	f.Intrinsic.String.Build("{0}\Custom",v.Caller.GlobalDir,v.Local.sDir)
+	f.Intrinsic.File.DirExists(v.Local.sDir,v.Local.bEx)
+	f.Intrinsic.Control.If(v.Local.bEx.Not)
+		f.Intrinsic.File.CreateDir(v.Local.sDir)		
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.String.Build("{0}\Custom\6506",v.Caller.GlobalDir,v.Local.sDir)
+	f.Intrinsic.Control.If(v.Local.bEx.Not)
+		f.Intrinsic.File.CreateDir(v.Local.sDir)		
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.String.Build("{0}\Custom\6506\{1}",v.Caller.GlobalDir,v.Caller.CompanyCode,v.Local.sDir)
+	f.Intrinsic.File.DirExists(v.Local.sDir,v.Local.bEx)
+	f.Intrinsic.Control.If(v.Local.bEx.Not)
+		f.Intrinsic.File.CreateDir(v.Local.sDir)
+	f.Intrinsic.Control.EndIf	
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Check_Folder.End
+
+Program.Sub.Create_Dictionaries.Start
+f.Intrinsic.Control.Try
+	v.Local.sVal.Declare
+	v.Local.sSQL.Declare
+
+	F.Global.Registry.ReadValue("SUPERVSR",V.Caller.CompanyCode,"ADPMAP",6506,1001,5,"",V.local.sVal)
+	f.Intrinsic.Control.If(v.Local.sVal.Trim,<>,"Comments_1",and,v.Local.sVal.Trim,<>,"Comments_2",v.Local.sVal.Trim,<>,"Comments_3",v.Local.sVal.Trim,<>,"Employee")
+		F.Global.Registry.AddValue("SUPERVSR",V.Caller.CompanyCode,"ADPMAP",6506,"1001",False,"Employee",False,0,-1,v.Ambient.Date,12:00:00 AM)
+		v.Local.sVal.Set("Employee")
+	f.Intrinsic.Control.EndIf
+	
+	f.Intrinsic.String.Build("Select Employee,rtrim({0}) from Employee_Mstr",v.Local.sVal.Trim,v.Local.sSQL)
+	f.ODBC.Connection!conx.OpenCompanyConnection
+	f.Data.Dictionary.CreateFromSQL("dictEmp","conx",v.Local.sSQL)
+	f.ODBC.Connection!conx.Close
+	f.Data.Dictionary.SetDefaultReturn("dictEmp","")
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Create_Dictionaries.End
