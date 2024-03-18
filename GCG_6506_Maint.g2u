@@ -1,0 +1,113 @@
+Program.Sub.ScreenSU.Start
+Gui.Form..Create
+Gui.Form..Caption("ADP Horizontal Export 6506")
+Gui.Form..Size(5745,3630)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..BackColor(-2147483633)
+Gui.Form..MousePointer(0)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.optComments1.Create(Option)
+Gui.Form.optComments1.Size(1575,255)
+Gui.Form.optComments1.Position(690,585)
+Gui.Form.optComments1.Caption("Comments 1")
+Gui.Form.optComments2.Create(Option)
+Gui.Form.optComments2.Size(1575,255)
+Gui.Form.optComments2.Position(690,1035)
+Gui.Form.optComments2.Caption("Comments 2")
+Gui.Form.optComments3.Create(Option)
+Gui.Form.optComments3.Size(1575,255)
+Gui.Form.optComments3.Position(690,1515)
+Gui.Form.optComments3.Caption("Comments 3")
+Gui.Form.optEmployee.Create(Option)
+Gui.Form.optEmployee.Size(1575,255)
+Gui.Form.optEmployee.Position(690,2025)
+Gui.Form.optEmployee.Caption("Employee")
+Gui.Form.lbl1.Create(Label,"Select Employee Master Field to map to ADP File Number",True,4245,255,0,315,270,True,0,"Arial",8,-2147483633,0)
+Gui.Form.cmdSave.Create(Button)
+Gui.Form.cmdSave.Size(855,375)
+Gui.Form.cmdSave.Position(705,2610)
+Gui.Form.cmdSave.Caption("Save")
+Gui.Form.cmdSave.Event(Click,cmdSave_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'BN, Nov 2021
+f.Intrinsic.Control.Try	
+	v.Local.sVal.Declare	
+	
+	F.Global.Registry.ReadValue("SUPERVSR",V.Caller.CompanyCode,"ADPMAP",6506,1001,5,"",V.local.sVal)
+	f.Intrinsic.Control.SelectCase(v.Local.sVal.Trim)
+		f.Intrinsic.Control.Case("Comments_1")
+			gui.Form.optComments1.Value(1)
+		f.Intrinsic.Control.Case("Comments_2")
+			gui.Form.optComments2.Value(1)
+		f.Intrinsic.Control.Case("Comments_3")
+			gui.Form.optComments3.Value(1)
+		f.Intrinsic.Control.Case("Employee")
+			gui.Form.optEmployee.Value(1)
+		f.Intrinsic.Control.CaseElse
+			F.Global.Registry.AddValue("SUPERVSR",V.Caller.CompanyCode,"ADPMAP",6506,"1001",False,"Employee",False,0,-1,v.Ambient.Date,12:00:00 AM)
+			gui.Form.optEmployee.Value(1)
+	f.Intrinsic.Control.EndSelect
+		
+	gui.Form..Show		
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.Catching.Start
+f.Intrinsic.Control.Try
+	v.Local.sError.Declare
+	
+	F.Intrinsic.String.Build("Error Number: {6}{0}Folder: {5}{0}Program: GCG_6506_Maint.g2u {0}Subroutine: {1}{0}Error Occurred {2} with description: {3}{0}GAB Version: {4}{0}GSS Version: {7}",V.Ambient.Newline,V.Args.Sub,V.Args.errorno,V.Args.errordesc,V.Ambient.GABVersion,v.Ambient.ScriptPath,v.Args.Errorno,v.Caller.GSSVersion,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	
+	f.Intrinsic.Control.CallSub(Unload)
+	
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.End
+f.Intrinsic.Control.EndTry
+Program.Sub.Catching.End
+
+Program.Sub.Form_UnLoad.Start
+F.Intrinsic.Control.Try	
+	
+	f.Intrinsic.Control.CallSub(Unload)	
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.Form_UnLoad.End
+
+Program.Sub.Unload.Start
+f.Intrinsic.Control.End
+Program.Sub.Unload.End
+
+Program.Sub.cmdSave_Click.Start
+f.Intrinsic.Control.Try
+	v.Local.sVal.Declare
+	
+	f.Intrinsic.UI.InvokeWaitDialog("Saving...")
+	f.Intrinsic.Control.If(v.Screen.Form!optComments1.Value,=,True)
+		v.Local.sVal.Set("Comments_1")
+	f.Intrinsic.Control.ElseIf(v.Screen.Form!optComments2.Value,=,True)
+		v.Local.sVal.Set("Comments_2")
+	f.Intrinsic.Control.ElseIf(v.Screen.Form!optComments3.Value,=,True)
+		v.Local.sVal.Set("Comments_3")
+	f.Intrinsic.Control.ElseIf(v.Screen.Form!optEmployee.Value,=,True)
+		v.Local.sVal.Set("Employee")
+	f.Intrinsic.Control.EndIf
+	F.Global.Registry.AddValue("SUPERVSR",V.Caller.CompanyCode,"ADPMAP",6506,"1001",False,v.Local.sVal,False,0,-1,v.Ambient.Date,12:00:00 AM)
+	f.Intrinsic.UI.CloseWaitDialog
+
+f.Intrinsic.Control.Catch
+	f.Intrinsic.Control.CallSub("Catching","sub",v.Ambient.CurrentSubroutine,"errorno",v.Ambient.ErrorNumber,"errordesc",v.Ambient.ErrorDescription)
+f.Intrinsic.Control.EndTry
+Program.Sub.cmdSave_Click.End
